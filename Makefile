@@ -3,8 +3,9 @@ NAME = codexion
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
+SRCS_DIR = src
 SRCS = main.c
-OBJS = $(SRCS:.c=.o)
+OBJS = $($(SRCS_DIR)/SRCS:.c=.o)
 
 .PHONY: all clean fclean re
 
