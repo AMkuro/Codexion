@@ -16,14 +16,5 @@ int	main(int argc, char *argv[])
 {
 	t_config	cfg;
 
-	if (argc != 9)
-	{
-		fprintf(stderr, "Error: invalid number of arguments\n");
-		fprintf(stderr, "Usage: ./codexion number_of_coders time_to_burnout ");
-		fprintf(stderr, "time_to_compile time_to_debug time_to_refactor ");
-		fprintf(stderr, "number_of_compiles_required ");
-		fprintf(stderr, "dongle_cooldown scheduler\n");
-		return (64);
-	}
 	return (0);
 }
