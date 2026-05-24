@@ -15,6 +15,7 @@
 # Precompiled Headers
 *.gch
 *.pch
+compile_commands.json
 
 # Libraries
 *.lib
