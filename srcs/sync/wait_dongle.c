@@ -6,7 +6,7 @@
 /*   By: miwasaki <miwasaki@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/11 18:32:08 by miwasaki          #+#    #+#             */
-/*   Updated: 2026/10/11 18:32:08 by miwasaki         ###   ########.fr       */
+/*   Updated: 2026/10/12 22:52:37 by miwasaki         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,8 @@ int	wait_dongle(t_coder *coder, t_dongle *dongle, t_request *request)
 {
 	while (!sim_should_stop(coder->sim))
 	{
-		if (heap_peek(&dongle->queue) == request && dongle->owner_id == 0
+		if (heap_peek(&dongle->queue) == request
+			&& dongle->owner_id == 0
 			&& now_ms() >= dongle->available_at_ms)
 		{
 			heap_pop(&dongle->queue);
