@@ -18,20 +18,24 @@ SRCS = \
 	$(SRCS_DIR)/runtime/coder_actions.c \
 	$(SRCS_DIR)/runtime/coder_routine.c \
 	$(SRCS_DIR)/runtime/simulation.c \
+	$(SRCS_DIR)/runtime/start.c \
 	$(SRCS_DIR)/runtime/stop.c \
 	$(SRCS_DIR)/scheduler/edf_scheduler.c \
 	$(SRCS_DIR)/scheduler/fifo_scheduler.c \
 	$(SRCS_DIR)/scheduler/heap.c \
+	$(SRCS_DIR)/scheduler/heap_ops.c \
+	$(SRCS_DIR)/scheduler/heap_order.c \
 	$(SRCS_DIR)/scheduler/heap_compare.c \
 	$(SRCS_DIR)/sync/acquire_dongles.c \
 	$(SRCS_DIR)/sync/dongle.c \
 	$(SRCS_DIR)/sync/release_dongles.c \
 	$(SRCS_DIR)/sync/request.c \
+	$(SRCS_DIR)/sync/wait_dongle.c \
 	$(SRCS_DIR)/time/sleep.c \
 	$(SRCS_DIR)/time/time.c
 OBJS = $(SRCS:.c=.o)
 
-.PHONY: all clean fclean re compile_commands
+.PHONY: all clean fclean re 
 
 all: $(NAME)
 
@@ -42,19 +46,10 @@ $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) -I$(INCS_DIR) -c $< -o $@
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) 
 
 fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
 
-compile_commands:
-	@printf '[\n' > compile_commands.json
-	@for src in $(SRCS); do \
-		printf '  {"directory":"%s","command":"$(CC) $(CFLAGS) -I$(INCS_DIR) -c %s -o %s","file":"%s"},\n' \
-			"$(CURDIR)" "$$src" "$${src%.c}.o" "$$src" \
-			>> compile_commands.json; \
-	done
-	@sed -i '$$ s/,$$//' compile_commands.json
-	@printf ']\n' >> compile_commands.json

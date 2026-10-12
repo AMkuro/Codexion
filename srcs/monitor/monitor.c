@@ -1,44 +1,58 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   monitor.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: miwasaki <miwasaki@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/10/11 18:32:08 by miwasaki          #+#    #+#             */
+/*   Updated: 2026/10/11 18:32:08 by miwasaki         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../includes/codexion.h"
 
-static int	coder_burned_out(t_sim *sim, t_coder *coder)
+/* The caller holds log_mutex, then stop_mutex. */
+int	check_burnout_locked(t_sim *sim, long now)
 {
-	long	last_compile;
-	int		compile_count;
+	int	i;
+	int	first;
 
-	pthread_mutex_lock(&coder->state_mutex);
-	last_compile = coder->last_compile_start_ms;
-	compile_count = coder->compile_count;
-	pthread_mutex_unlock(&coder->state_mutex);
-	if (compile_count >= sim->cfg.number_of_compiles_required)
-		return (0);
-	return (now_ms() - last_compile >= sim->cfg.time_to_burnout);
+	if (sim->stop || !sim->started)
+		return (sim->stop);
+	i = 0;
+	first = 0;
+	while (++i < sim->cfg.number_of_coders)
+	{
+		if (sim->coders[i].last_compile_start_ms
+			< sim->coders[first].last_compile_start_ms)
+			first = i;
+	}
+	if (now - sim->coders[first].last_compile_start_ms
+		>= sim->cfg.time_to_burnout)
+	{
+		sim->stop = 1;
+		printf("%ld %d burned out\n", now - sim->start_ms,
+			sim->coders[first].id);
+	}
+	return (sim->stop);
 }
 
 void	*monitor_routine(void *arg)
 {
 	t_sim	*sim;
-	int		i;
 
 	sim = (t_sim *)arg;
+	if (wait_for_start(sim) != EXIT_OK)
+		return (NULL);
 	while (!sim_should_stop(sim))
 	{
-		if (all_coders_completed(sim))
-		{
-			sim_stop(sim);
-			return (NULL);
-		}
-		i = 0;
-		while (i < sim->cfg.number_of_coders)
-		{
-			if (coder_burned_out(sim, &sim->coders[i]))
-			{
-				log_burnout(sim, sim->coders[i].id);
-				sim_stop(sim);
-				return (NULL);
-			}
-			i++;
-		}
-		usleep(1000);
+		pthread_mutex_lock(&sim->log_mutex);
+		pthread_mutex_lock(&sim->stop_mutex);
+		check_burnout_locked(sim, now_ms());
+		pthread_mutex_unlock(&sim->stop_mutex);
+		pthread_mutex_unlock(&sim->log_mutex);
+		usleep(500);
 	}
 	return (NULL);
 }

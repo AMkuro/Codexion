@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   dongle.h                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: miwasaki <miwasaki@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/10/11 18:32:08 by miwasaki          #+#    #+#             */
+/*   Updated: 2026/10/11 18:32:08 by miwasaki         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef DONGLE_H
 # define DONGLE_H
 
@@ -5,8 +17,8 @@
 
 int		init_dongles(t_sim *sim);
 void	destroy_dongles(t_sim *sim);
-int		init_request(t_request *request, t_coder *coder);
-void	destroy_request(t_request *request);
+void	init_request(t_request *request, t_coder *coder, t_dongle *dongle);
+int		wait_dongle(t_coder *coder, t_dongle *dongle, t_request *request);
 int		acquire_dongles(t_coder *coder);
 void	release_dongles(t_coder *coder);
 

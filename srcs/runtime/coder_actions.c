@@ -1,21 +1,30 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   coder_actions.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: miwasaki <miwasaki@student.42tokyo.jp>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/10/11 18:32:08 by miwasaki          #+#    #+#             */
+/*   Updated: 2026/10/11 18:32:08 by miwasaki         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../includes/codexion.h"
 
-void	coder_compile(t_coder *coder)
+int	coder_compile(t_coder *coder)
 {
 	if (acquire_dongles(coder) != EXIT_OK)
+		return (EXIT_ERROR);
+	if (begin_compile(coder) != EXIT_OK)
 	{
-		sleep_ms(coder->sim, 1);
-		return ;
+		release_dongles(coder);
+		return (EXIT_ERROR);
 	}
-	pthread_mutex_lock(&coder->state_mutex);
-	coder->last_compile_start_ms = now_ms();
-	pthread_mutex_unlock(&coder->state_mutex);
-	log_state(coder->sim, coder->id, "is compiling");
 	sleep_ms(coder->sim, coder->sim->cfg.time_to_compile);
-	pthread_mutex_lock(&coder->state_mutex);
-	coder->compile_count++;
-	pthread_mutex_unlock(&coder->state_mutex);
+	finish_compile(coder);
 	release_dongles(coder);
+	return (EXIT_OK);
 }
 
 void	coder_debug(t_coder *coder)
