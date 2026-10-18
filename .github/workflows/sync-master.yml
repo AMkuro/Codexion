@@ -1,0 +1,38 @@
+name: Sync submission branch
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: sync-master
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      # Subject: Makefile at root, *.c/*.h, README.md. Everything else stays on develop.
+      SUBMIT: Makefile README.md README_ja.md .gitignore includes srcs
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build master from develop
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          src=$(git rev-parse HEAD)
+          if git ls-remote --exit-code --heads origin master; then
+            git checkout -B master origin/master
+          else
+            git checkout --orphan master
+          fi
+          git rm -rq --ignore-unmatch .
+          git checkout "$src" -- $SUBMIT
+          git diff --cached --quiet && exit 0
+          git commit -m "submit: $(git log -1 --format=%s "$src")" -m "from develop $src"
+          git push origin master
