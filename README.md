@@ -2,12 +2,10 @@
 
 # Codexion
 
-
 ## Description
 
-Codexion is a C simulation of coders competing for USB dongles, following
-Subject version 1.3. Each coder runs in its own POSIX thread and repeatedly
-compiles, debugs, and refactors. Compiling requires both adjacent dongles.
+Codexion is a C simulation of coders competing for USB dongles. 
+Each coder runs in its own POSIX thread and repeatedly compiles, debugs, and refactors. Compiling requires both adjacent dongles.
 A separate monitor checks burnout deadlines.
 
 Every dongle uses a custom binary heap to arbitrate competing requests with
@@ -17,8 +15,7 @@ continues its normal cycle and remains subject to burnout until global completio
 
 ## Instructions
 
-A C compiler, Make, and POSIX threads are required. No libft or additional runtime
-library is used.
+A C compiler, Make, and POSIX threads are required.
 
 ```sh
 make
@@ -59,7 +56,6 @@ nonzero.
 make clean    # Remove object files and dependency files
 make fclean   # Also remove the executable
 make re       # Rebuild from scratch
-python3 tests/test_codexion.py
 norminette includes srcs
 ```
 
@@ -142,6 +138,5 @@ that gate so partially created threads can exit and be joined.
   and priority queues.
 - Coffman, Elphick, and Shoshani, *System Deadlocks*: deadlock conditions.
 
-AI was used in this revision to review existing code against the Subject,
-implement parser, scheduling, synchronization, and cleanup corrections, write
+AI was used to review code, cleanup corrections, write
 regression probes and this README, and review the resulting changes.
