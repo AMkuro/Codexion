@@ -3,15 +3,26 @@ name: Sync submission branch
 on:
   push:
     branches: [develop]
+  pull_request:
+    branches: [develop]
   workflow_dispatch:
 
 permissions:
   contents: write
 
-concurrency: sync-master
-
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make
+      - run: python3 tests/test_codexion.py
+      - run: pipx install norminette && norminette includes srcs
+
   sync:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/develop'
+    concurrency: sync-master
     runs-on: ubuntu-latest
     env:
       # Subject: Makefile at root, *.c/*.h, README.md. Everything else stays on develop.
