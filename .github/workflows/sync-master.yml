@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Subject: Makefile at root, *.c/*.h, README.md. Everything else stays on develop.
-      SUBMIT: Makefile README.md README_ja.md .gitignore includes srcs
+      SUBMIT: Makefile README.md .gitignore includes srcs
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,8 +31,9 @@ jobs:
           else
             git checkout --orphan master
           fi
-          git rm -rq --ignore-unmatch .
+          git rm -rqf --ignore-unmatch .
           git checkout "$src" -- $SUBMIT
+          sed -i '/README_ja\.md/d' README.md && git add README.md
           git diff --cached --quiet && exit 0
           git commit -m "submit: $(git log -1 --format=%s "$src")" -m "from develop $src"
           git push origin master
