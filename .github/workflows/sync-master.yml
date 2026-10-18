@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Subject: Makefile at root, *.c/*.h, README.md. Everything else stays on develop.
-      SUBMIT: Makefile README.md .gitignore includes srcs
+      SUBMIT: "Makefile README.md :(glob)**/*.c :(glob)**/*.h"
     steps:
       - uses: actions/checkout@v4
         with:
