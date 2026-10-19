@@ -6,7 +6,7 @@
 /*   By: miwasaki <miwasaki@student.42tokyo.jp>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/11 18:32:08 by miwasaki          #+#    #+#             */
-/*   Updated: 2026/10/11 18:32:08 by miwasaki         ###   ########.fr       */
+/*   Updated: 2026/10/19 12:00:00 by miwasaki         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,8 @@ typedef struct s_request
 	int					coder_id;
 	unsigned long		arrival_seq;
 	long				deadline_ms;
+	int					compile_count;
+	int					rank;
 }	t_request;
 
 typedef struct s_heap
@@ -55,7 +57,6 @@ typedef struct s_dongle
 	int					owner_id;
 	int					init_stage;
 	long				available_at_ms;
-	unsigned long		next_arrival;
 	pthread_mutex_t		mutex;
 	pthread_cond_t		cond;
 	t_heap				queue;
@@ -79,6 +80,7 @@ typedef struct s_sim
 	int					stop;
 	int					started;
 	int					init_stage;
+	unsigned long		next_arrival;
 	pthread_mutex_t		stop_mutex;
 	pthread_mutex_t		log_mutex;
 	pthread_cond_t		start_cond;

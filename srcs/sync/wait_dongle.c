@@ -14,7 +14,7 @@
 #include <errno.h>
 #include <time.h>
 
-static int	wait_tick(t_dongle *dongle)
+int	wait_tick(t_dongle *dongle)
 {
 	struct timeval	tv;
 	struct timespec	until;

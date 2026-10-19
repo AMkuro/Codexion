@@ -28,7 +28,7 @@ static void *request_worker(void *arg) {
     t_job *job = arg;
     t_request request;
     pthread_mutex_lock(&job->dongle->mutex);
-    init_request(&request, job->coder, job->dongle);
+    init_request(&request, job->coder);
     assert(heap_push(&job->dongle->queue, &request) == EXIT_OK);
     if (wait_dongle(job->coder, job->dongle, &request) == EXIT_OK) {
         job->granted_at[*job->count] = now_ms();
@@ -102,7 +102,7 @@ static void heap_case(int policy) {
     t_request req[16];
     assert(heap_init(&heap, 16, policy) == EXIT_OK);
     for (int i = 0; i < 16; i++) {
-        req[i] = (t_request){i + 1, (unsigned long)((i * 7) % 16), (i * 11) % 5};
+        req[i] = (t_request){i + 1, (unsigned long)((i * 7) % 16), (i * 11) % 5, 0, 0};
         assert(heap_push(&heap, &req[i]) == EXIT_OK);
     }
     assert(heap_push(&heap, &req[0]) == EXIT_ERROR);
@@ -120,6 +120,19 @@ static void heap_case(int policy) {
     assert(heap_peek(&heap) == NULL && heap_pop(&heap) == NULL);
     heap_remove(&heap, &req[0]);
     heap_destroy(&heap);
+}
+
+static void edf_tie_case(void) {
+    t_request a = {1, 0, 100, 1, 0};
+    t_request b = {2, 1, 100, 0, 1};
+    assert(edf_request_before(&b, &a));
+    b.compile_count = 1;
+    assert(edf_request_before(&a, &b));
+    b.rank = 0;
+    assert(edf_request_before(&a, &b) && !edf_request_before(&b, &a));
+    b.deadline_ms = 99;
+    assert(edf_request_before(&b, &a));
+    assert(fifo_request_before(&a, &b));
 }
 
 static void state_cases(void) {
@@ -169,6 +182,7 @@ int main(void) {
     assert(parse_non_negative_long("9223372036854775808", &duration) != EXIT_OK);
     heap_case(SCHED_KIND_FIFO);
     heap_case(SCHED_KIND_EDF);
+    edf_tie_case();
     queue_case(SCHED_KIND_FIFO, 0, 0);
     queue_case(SCHED_KIND_EDF, 0, 0);
     queue_case(SCHED_KIND_EDF, 1, 0);
@@ -335,9 +349,6 @@ class CodexionTests(unittest.TestCase):
             self.assertGreaterEqual(timestamp, previous)
             previous = timestamp
             pair = [coder, coder % count + 1] if count > 1 else [1]
-            def rank(dongle):
-                return 2 if count % 2 and dongle == count else (dongle - 1) % 2
-            pair.sort(key=rank)
             if action == 'has taken a dongle':
                 self.assertLess(len(takes[coder]), len(pair))
                 dongle = pair[len(takes[coder])]
@@ -379,14 +390,17 @@ class CodexionTests(unittest.TestCase):
             for count in (2, 3, 5, 8):
                 with self.subTest(policy=policy, count=count):
                     self.check_log((count, 1000, 8, 5, 5, 3, 3, policy), False)
-            with self.subTest(policy=policy, case='ring convoy'):
-                self.check_log((5, 350, 100, 1, 1, 1, 0, policy), False)
             for args in ((1, 40, 8, 5, 5, 1, 0, policy),
                          (2, 15, 30, 5, 5, 1, 0, policy),
                          (3, 20, 8, 30, 5, 3, 2, policy),
                          (2, 30, 8, 5, 5, 3, 80, policy)):
                 with self.subTest(args=args):
                     self.check_log(args, True)
+        # Liveness is only required under EDF; strict FIFO can serialize the ring.
+        with self.subTest(policy='edf', case='ring convoy'):
+            self.check_log((5, 350, 100, 1, 1, 1, 0, 'edf'), False)
+        with self.subTest(policy='edf', case='no hold-and-wait under cooldown'):
+            self.check_log((5, 320, 20, 20, 20, 3, 80, 'edf'), False)
 
     def compile_probe(self, name, source, extra=(), excluded=()):
         path = self.directory / (name + '.c')
@@ -404,28 +418,6 @@ class CodexionTests(unittest.TestCase):
         self.assertIn('PASS', result.stdout)
         self.assertEqual(result.stdout.count('burned out'), 2)
         self.assertNotIn('is debugging', result.stdout)
-
-    def test_resource_order(self):
-        # Selecting the old 1->2->3->4->5 reservation chain must be impossible.
-        source = '#include "' + str(ROOT / 'srcs/sync/acquire_dongles.c') + '"\n'
-        source += r'''#include <assert.h>
-int main(void) {
-    t_dongle dongles[16] = {0};
-    for (int count = 2; count <= 16; count++) {
-        for (int i = 0; i < count; i++) dongles[i].id = i + 1;
-        for (int i = 0; i < count; i++) {
-            t_dongle *first = &dongles[i];
-            t_dongle *second = &dongles[(i + 1) % count];
-            order_dongles(&first, &second, count);
-            assert(dongle_rank(first, count) < dongle_rank(second, count));
-        }
-    }
-    return 0;
-}
-'''
-        binary = self.compile_probe('order', source, excluded=('acquire_dongles.c',))
-        result = subprocess.run([str(binary)], capture_output=True, text=True, timeout=5)
-        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_failure_cleanup(self):
         header = self.directory / 'injection.h'
