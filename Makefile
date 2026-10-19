@@ -28,9 +28,11 @@ SRCS = \
 	$(SRCS_DIR)/scheduler/heap_compare.c \
 	$(SRCS_DIR)/sync/acquire_dongles.c \
 	$(SRCS_DIR)/sync/dongle.c \
+	$(SRCS_DIR)/sync/lock_dongles.c \
 	$(SRCS_DIR)/sync/release_dongles.c \
 	$(SRCS_DIR)/sync/request.c \
 	$(SRCS_DIR)/sync/wait_dongle.c \
+	$(SRCS_DIR)/sync/wait_pair.c \
 	$(SRCS_DIR)/time/sleep.c \
 	$(SRCS_DIR)/time/time.c
 OBJS = $(SRCS:.c=.o)
