@@ -21,7 +21,6 @@ static void	release_one_dongle(t_coder *coder, t_dongle *dongle)
 	{
 		dongle->owner_id = 0;
 		dongle->available_at_ms = now_ms() + coder->sim->cfg.dongle_cooldown;
-		pthread_cond_broadcast(&dongle->cond);
 	}
 	pthread_mutex_unlock(&dongle->mutex);
 }

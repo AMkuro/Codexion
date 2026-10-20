@@ -38,8 +38,6 @@ static void	cancel_pair(t_coder *coder, t_request *request)
 {
 	heap_remove(&coder->left->queue, request);
 	heap_remove(&coder->right->queue, request);
-	pthread_cond_broadcast(&coder->left->cond);
-	pthread_cond_broadcast(&coder->right->cond);
 }
 
 /* Both dongles are granted together: no coder holds one while waiting. */

@@ -17,12 +17,9 @@ static int	init_one_dongle(t_dongle *dongle, t_scheduler_kind scheduler)
 	if (pthread_mutex_init(&dongle->mutex, NULL) != 0)
 		return (EXIT_ERROR);
 	dongle->init_stage = 1;
-	if (pthread_cond_init(&dongle->cond, NULL) != 0)
-		return (EXIT_ERROR);
-	dongle->init_stage = 2;
 	if (heap_init(&dongle->queue, 2, scheduler) != EXIT_OK)
 		return (EXIT_ERROR);
-	dongle->init_stage = 3;
+	dongle->init_stage = 2;
 	return (EXIT_OK);
 }
 
@@ -48,10 +45,8 @@ void	destroy_dongles(t_sim *sim)
 	i = 0;
 	while (sim->dongles != NULL && i < sim->cfg.number_of_coders)
 	{
-		if (sim->dongles[i].init_stage >= 3)
-			heap_destroy(&sim->dongles[i].queue);
 		if (sim->dongles[i].init_stage >= 2)
-			pthread_cond_destroy(&sim->dongles[i].cond);
+			heap_destroy(&sim->dongles[i].queue);
 		if (sim->dongles[i].init_stage >= 1)
 			pthread_mutex_destroy(&sim->dongles[i].mutex);
 		i++;

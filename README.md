@@ -122,13 +122,11 @@ an output destination that can accept writes.
 
 Each dongle's `pthread_mutex_t` protects its owner, cooldown timestamp, and
 request heap. Only its two adjacent coders can request it, so its heap needs two
-slots. A waiter unlocks both dongles and waits with `pthread_cond_timedwait` on
-its left dongle only. Every wakeup relocks both and rechecks owners, queue heads,
-cooldowns, and the simulation stop flag; a spurious wakeup cannot grant
-ownership. Release
-broadcasts to waiters.
-A one-millisecond timeout also lets waiters observe cooldown expiry and stopping
-without depending on an additional notification thread.
+slots. A waiter unlocks both dongles and sleeps with `usleep(500)` before
+checking again. Every check relocks both and rechecks owners, queue heads,
+cooldowns, and the simulation stop flag; ownership is granted only when all of
+them allow it. The same periodic check notices cooldown expiry and stopping, so
+no notification between threads is needed.
 
 `stop_mutex` protects the simulation start gate, stop flag, arrival sequence,
 every coder's latest compile start, and completed compile counts, which requests
