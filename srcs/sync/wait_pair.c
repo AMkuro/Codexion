@@ -11,26 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../includes/codexion.h"
-#include <errno.h>
-#include <time.h>
-
-static int	wait_tick(t_dongle *dongle)
-{
-	struct timeval	tv;
-	struct timespec	until;
-	int				status;
-
-	gettimeofday(&tv, NULL);
-	until.tv_sec = tv.tv_sec;
-	until.tv_nsec = (tv.tv_usec * 1000L) + 1000000L;
-	if (until.tv_nsec >= 1000000000L)
-	{
-		until.tv_sec++;
-		until.tv_nsec -= 1000000000L;
-	}
-	status = pthread_cond_timedwait(&dongle->cond, &dongle->mutex, &until);
-	return (status != 0 && status != ETIMEDOUT);
-}
 
 /* Each dongle serves only its heap head, so the earliest deadline wins. */
 static int	is_ready(t_dongle *dongle, t_request *request, long now)
@@ -57,23 +37,16 @@ static int	take_pair(t_coder *coder, t_request *request)
 int	wait_pair(t_coder *coder, t_request *request, t_dongle **set)
 {
 	int	taken;
-	int	failed;
 
 	taken = 0;
-	failed = 0;
-	while (!taken && !failed && !sim_should_stop(coder->sim))
+	while (!taken && !sim_should_stop(coder->sim))
 	{
 		lock_dongles(set);
 		taken = take_pair(coder, request);
 		unlock_dongles(set);
-		if (taken)
-			break ;
-		pthread_mutex_lock(&coder->left->mutex);
-		failed = wait_tick(coder->left);
-		pthread_mutex_unlock(&coder->left->mutex);
+		if (!taken)
+			usleep(500);
 	}
-	if (failed)
-		sim_stop(coder->sim);
 	if (taken)
 		return (EXIT_OK);
 	return (EXIT_ERROR);

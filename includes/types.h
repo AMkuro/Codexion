@@ -58,7 +58,6 @@ typedef struct s_dongle
 	int					init_stage;
 	long				available_at_ms;
 	pthread_mutex_t		mutex;
-	pthread_cond_t		cond;
 	t_heap				queue;
 }	t_dongle;
 

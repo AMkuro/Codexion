@@ -75,7 +75,6 @@ static void queue_case(int policy, int tie, int cancel) {
     sim.dongles[0].available_at_ms = ready;
     if (cancel) sim_stop(&sim);
     else sim.dongles[0].owner_id = 0;
-    pthread_cond_broadcast(&sim.dongles[0].cond);
     pthread_mutex_unlock(&sim.dongles[0].mutex);
     for (int i = 0; i < 2; i++) assert(pthread_join(threads[i], NULL) == 0);
     assert(sim.dongles[0].queue.size == 0 && sim.dongles[1].queue.size == 0);
