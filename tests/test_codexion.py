@@ -26,18 +26,11 @@ typedef struct s_job {
 
 static void *request_worker(void *arg) {
     t_job *job = arg;
-    t_request request;
-    pthread_mutex_lock(&job->dongle->mutex);
-    init_request(&request, job->coder);
-    assert(heap_push(&job->dongle->queue, &request) == EXIT_OK);
-    if (wait_dongle(job->coder, job->dongle, &request) == EXIT_OK) {
+    if (acquire_dongles(job->coder) == EXIT_OK) {
         job->granted_at[*job->count] = now_ms();
         job->order[(*job->count)++] = job->coder->id;
-        job->dongle->owner_id = 0;
-        job->dongle->available_at_ms = now_ms() + 3;
-        pthread_cond_broadcast(&job->dongle->cond);
+        release_dongles(job->coder);
     }
-    pthread_mutex_unlock(&job->dongle->mutex);
     return NULL;
 }
 
@@ -85,7 +78,7 @@ static void queue_case(int policy, int tie, int cancel) {
     pthread_cond_broadcast(&sim.dongles[0].cond);
     pthread_mutex_unlock(&sim.dongles[0].mutex);
     for (int i = 0; i < 2; i++) assert(pthread_join(threads[i], NULL) == 0);
-    assert(sim.dongles[0].queue.size == 0);
+    assert(sim.dongles[0].queue.size == 0 && sim.dongles[1].queue.size == 0);
     if (cancel) assert(count == 0 && sim.dongles[0].owner_id == 99);
     else {
         assert(count == 2);
