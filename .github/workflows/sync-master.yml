@@ -25,8 +25,8 @@ jobs:
     concurrency: sync-master
     runs-on: ubuntu-latest
     env:
-      # Subject: Makefile at root, *.c/*.h, README.md. Everything else stays on develop.
-      SUBMIT: "Makefile README.md :(glob)**/*.c :(glob)**/*.h"
+      # Subject: Makefile at root, *.c/*.h, README.md, plus .gitignore. Everything else stays on develop.
+      SUBMIT: "Makefile README.md .gitignore :(glob)**/*.c :(glob)**/*.h"
     steps:
       - uses: actions/checkout@v7
         with:
