@@ -150,7 +150,6 @@ that gate so partially created threads can exit and be joined.
 - Codexion Subject v1.3: assignment requirements, including FIFO/EDF, deadlines,
   cooldown, logging, and required documentation.
 - [POSIX mutex operations](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_mutex_lock.html)
-- [POSIX condition waits](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_cond_timedwait.html)
 - [POSIX thread creation](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_create.html)
 - [Official 42 Norminette](https://github.com/42School/norminette)
 - Cormen, Leiserson, Rivest, and Stein, *Introduction to Algorithms*: binary heaps
