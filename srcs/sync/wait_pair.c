@@ -11,6 +11,26 @@
 /* ************************************************************************** */
 
 #include "../../includes/codexion.h"
+#include <errno.h>
+#include <time.h>
+
+static int	wait_tick(t_dongle *dongle)
+{
+	struct timeval	tv;
+	struct timespec	until;
+	int				status;
+
+	gettimeofday(&tv, NULL);
+	until.tv_sec = tv.tv_sec;
+	until.tv_nsec = (tv.tv_usec * 1000L) + 1000000L;
+	if (until.tv_nsec >= 1000000000L)
+	{
+		until.tv_sec++;
+		until.tv_nsec -= 1000000000L;
+	}
+	status = pthread_cond_timedwait(&dongle->cond, &dongle->mutex, &until);
+	return (status != 0 && status != ETIMEDOUT);
+}
 
 /* Each dongle serves only its heap head, so the earliest deadline wins. */
 static int	is_ready(t_dongle *dongle, t_request *request, long now)
