@@ -31,26 +31,3 @@ int	wait_tick(t_dongle *dongle)
 	status = pthread_cond_timedwait(&dongle->cond, &dongle->mutex, &until);
 	return (status != 0 && status != ETIMEDOUT);
 }
-
-int	wait_dongle(t_coder *coder, t_dongle *dongle, t_request *request)
-{
-	while (!sim_should_stop(coder->sim))
-	{
-		if (heap_peek(&dongle->queue) == request
-			&& dongle->owner_id == 0
-			&& now_ms() >= dongle->available_at_ms)
-		{
-			heap_pop(&dongle->queue);
-			dongle->owner_id = coder->id;
-			return (EXIT_OK);
-		}
-		if (wait_tick(dongle) != 0)
-		{
-			sim_stop(coder->sim);
-			break ;
-		}
-	}
-	heap_remove(&dongle->queue, request);
-	pthread_cond_broadcast(&dongle->cond);
-	return (EXIT_ERROR);
-}
