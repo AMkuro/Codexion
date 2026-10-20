@@ -15,19 +15,9 @@
 /* A lone coder can take its only dongle but can never compile. */
 static int	acquire_single(t_coder *coder)
 {
-	t_request	request;
-	int			status;
-
 	pthread_mutex_lock(&coder->left->mutex);
-	init_request(&request, coder);
-	status = heap_push(&coder->left->queue, &request);
-	if (status == EXIT_OK)
-		status = wait_dongle(coder, coder->left, &request);
-	else
-		sim_stop(coder->sim);
+	coder->left->owner_id = coder->id;
 	pthread_mutex_unlock(&coder->left->mutex);
-	if (status != EXIT_OK)
-		return (EXIT_ERROR);
 	log_state(coder->sim, coder->id, "has taken a dongle");
 	while (!sim_should_stop(coder->sim))
 		usleep(500);
