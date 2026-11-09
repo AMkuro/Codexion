@@ -19,7 +19,6 @@ int			heap_init(t_heap *heap, size_t capacity,
 				t_scheduler_kind scheduler);
 void		heap_destroy(t_heap *heap);
 int			heap_push(t_heap *heap, t_request *request);
-t_request	*heap_pop(t_heap *heap);
 t_request	*heap_peek(t_heap *heap);
 void		heap_remove(t_heap *heap, t_request *request);
 size_t		heap_sift_up(t_heap *heap, size_t index);

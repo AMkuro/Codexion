@@ -104,12 +104,13 @@ static void heap_case(int policy) {
     assert(heap.size == 13);
     t_request *previous = NULL;
     while (heap.size) {
-        t_request *next = heap_pop(&heap);
+        t_request *next = heap_peek(&heap);
+        heap_remove(&heap, next);
         assert(next != &req[0] && next != &req[7] && next != &req[15]);
         if (previous) assert(heap_request_before(&heap, previous, next));
         previous = next;
     }
-    assert(heap_peek(&heap) == NULL && heap_pop(&heap) == NULL);
+    assert(heap_peek(&heap) == NULL);
     heap_remove(&heap, &req[0]);
     heap_destroy(&heap);
 }
