@@ -13,7 +13,7 @@
 #include "../../includes/codexion.h"
 
 /* A lone coder can take its only dongle but can never compile. */
-static int	acquire_single(t_coder *coder)
+static int	hold_sole_dongle(t_coder *coder)
 {
 	pthread_mutex_lock(&coder->left->mutex);
 	coder->left->owner_id = coder->id;
@@ -25,7 +25,7 @@ static int	acquire_single(t_coder *coder)
 	return (EXIT_ERROR);
 }
 
-static int	push_pair(t_coder *coder, t_request *request)
+static int	enqueue_request(t_coder *coder, t_request *request)
 {
 	if (heap_push(&coder->left->queue, request) == EXIT_OK
 		&& heap_push(&coder->right->queue, request) == EXIT_OK)
@@ -34,7 +34,7 @@ static int	push_pair(t_coder *coder, t_request *request)
 	return (EXIT_ERROR);
 }
 
-static void	cancel_pair(t_coder *coder, t_request *request)
+static void	cancel_request(t_coder *coder, t_request *request)
 {
 	heap_remove(&coder->left->queue, request);
 	heap_remove(&coder->right->queue, request);
@@ -48,14 +48,14 @@ int	acquire_dongles(t_coder *coder)
 	int			status;
 
 	if (coder->right == NULL)
-		return (acquire_single(coder));
-	order_pair(coder, set);
+		return (hold_sole_dongle(coder));
+	sort_dongles_by_id(coder, set);
 	lock_dongles(set);
 	init_request(&request, coder);
-	status = push_pair(coder, &request);
+	status = enqueue_request(coder, &request);
 	unlock_dongles(set);
 	if (status == EXIT_OK)
-		status = wait_pair(coder, &request, set);
+		status = wait_and_take_dongles(coder, &request, set);
 	if (status == EXIT_OK)
 	{
 		log_state(coder->sim, coder->id, "has taken a dongle");
@@ -63,7 +63,7 @@ int	acquire_dongles(t_coder *coder)
 		return (EXIT_OK);
 	}
 	lock_dongles(set);
-	cancel_pair(coder, &request);
+	cancel_request(coder, &request);
 	unlock_dongles(set);
 	return (EXIT_ERROR);
 }

@@ -13,7 +13,7 @@
 #include "../../includes/codexion.h"
 
 /* Every coder locks its pair in ascending ID order, ruling out lock cycles. */
-void	order_pair(t_coder *coder, t_dongle **set)
+void	sort_dongles_by_id(t_coder *coder, t_dongle **set)
 {
 	set[0] = coder->left;
 	set[1] = coder->right;
