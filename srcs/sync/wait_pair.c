@@ -34,7 +34,7 @@ static int	take_pair(t_coder *coder, t_request *request)
 	return (1);
 }
 
-int	wait_pair(t_coder *coder, t_request *request, t_dongle **set)
+int	wait_and_take_dongles(t_coder *coder, t_request *request, t_dongle **set)
 {
 	int	taken;
 

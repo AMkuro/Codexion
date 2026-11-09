@@ -18,8 +18,9 @@
 int		init_dongles(t_sim *sim);
 void	destroy_dongles(t_sim *sim);
 void	init_request(t_request *request, t_coder *coder);
-int		wait_pair(t_coder *coder, t_request *request, t_dongle **set);
-void	order_pair(t_coder *coder, t_dongle **set);
+int		wait_and_take_dongles(t_coder *coder, t_request *request,
+			t_dongle **set);
+void	sort_dongles_by_id(t_coder *coder, t_dongle **set);
 void	lock_dongles(t_dongle **set);
 void	unlock_dongles(t_dongle **set);
 int		acquire_dongles(t_coder *coder);
