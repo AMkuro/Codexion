@@ -22,29 +22,28 @@ jobs:
   sync:
     needs: test
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/develop'
-    concurrency: sync-master
+    concurrency: sync-main
     runs-on: ubuntu-latest
-    env:
-      # Subject: Makefile at root, *.c/*.h, README.md, plus .gitignore. Everything else stays on develop.
-      SUBMIT: "Makefile README.md .gitignore :(glob)**/*.c :(glob)**/*.h"
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Build master from develop
+      - name: Build main from develop
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           src=$(git rev-parse HEAD)
-          if git ls-remote --exit-code --heads origin master; then
-            git checkout -B master origin/master
+          manifest=$(git show "$src:submission-files.txt")
+          mapfile -t submit < <(sed -e '/^[[:space:]]*#/d' -e '/^[[:space:]]*$/d' -e 's/^/:(glob)/' <<<"$manifest")
+          if git ls-remote --exit-code --heads origin main; then
+            git checkout -B main origin/main
           else
-            git checkout --orphan master
+            git checkout --orphan main
           fi
           git rm -rqf --ignore-unmatch .
-          git checkout "$src" -- $SUBMIT
+          git checkout "$src" -- "${submit[@]}"
           sed -i '/README_ja\.md/d' README.md && git add README.md
           git diff --cached --quiet && exit 0
           git commit -m "submit: $(git log -1 --format=%s "$src")" -m "from develop $src"
-          git push origin master
+          git push origin main
