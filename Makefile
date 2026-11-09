@@ -41,14 +41,14 @@ OBJS = $(SRCS:.c=.o)
 all: $(NAME)
 
 help:
-	@echo "Usage: make [target]"
+	@echo "Usage: make [target] (no target runs 'all')"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all     Build $(NAME) (default)"
+	@echo "  all     Build $(NAME)"
+	@echo "  help    Show this help"
 	@echo "  clean   Remove object files"
 	@echo "  fclean  Remove object files and $(NAME)"
 	@echo "  re      Rebuild from scratch"
-	@echo "  help    Show this help"
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJS)
