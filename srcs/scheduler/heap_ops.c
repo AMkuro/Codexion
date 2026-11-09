@@ -24,17 +24,6 @@ int	heap_push(t_heap *heap, t_request *request)
 	return (EXIT_OK);
 }
 
-t_request	*heap_pop(t_heap *heap)
-{
-	t_request	*request;
-
-	request = heap_peek(heap);
-	if (request == NULL)
-		return (NULL);
-	heap_remove(heap, request);
-	return (request);
-}
-
 void	heap_remove(t_heap *heap, t_request *request)
 {
 	size_t	index;
