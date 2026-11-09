@@ -79,8 +79,10 @@ norminette includes srcs
   the required quota), then lower ring rank, then arrival sequence and coder ID.
   The tie-break order is an implementation choice: fewer compiles favors less
   progress when deadlines tie; ring rank favors nonadjacent coders at the common
-  start, when all deadlines and counts are equal. Rank is 0 for odd coder IDs,
-  1 for even IDs, except the last coder of an odd ring has rank 2.
+  start, when all deadlines and counts are equal and both requests are already
+  queued. A coder whose neighbor has not queued yet can take the pair first.
+  Rank is 0 for odd coder IDs, 1 for even IDs, except the last coder of an odd
+  ring has rank 2.
   Request fields stay unchanged while queued, giving both heaps the same ordering.
 - **Scheduling limitations:** A queue head waiting for its other dongle can delay
   requests behind it even when a dongle is free. FIFO can therefore serialize
@@ -107,8 +109,8 @@ norminette includes srcs
   and joined.
 
 The Subject requires a burnout log within 10 ms of expiry. The implementation
-uses `gettimeofday()` and polling, so process suspension, wall-clock changes, or blocked stdout can prevent
-it from meeting that bound.
+uses `gettimeofday()` and polling, so process suspension, wall-clock changes, or
+blocked stdout can prevent it from meeting that bound.
 
 ## Thread synchronization mechanisms
 
@@ -121,10 +123,11 @@ happen while both mutexes are held, so competing coders cannot acquire the same
 dongle. An unsuccessful waiter unlocks both and calls `usleep(500)` before retrying;
 dongle availability is polled rather than signaled.
 
-`stop_mutex` protects the simulation start gate, stop flag, arrival sequence,
-every coder's latest compile start, and completed compile counts, which requests
-copy as their EDF deadline and compile-count tie-break. Waiters check the stop
-flag between acquisition attempts; this check is separate from taking the pair.
+`stop_mutex` protects the simulation start gate, start timestamp, stop flag,
+arrival sequence, every coder's latest compile start, and completed compile
+counts, which requests copy as their EDF deadline and compile-count tie-break.
+Waiters check the stop flag between acquisition attempts; this check is separate
+from taking the pair.
 If stopping races with acquisition, `begin_compile` rejects compilation and the
 coder releases the pair. Checking expiry and refreshing a compile start happen
 in one critical section, so the monitor cannot decide burnout from an invalidated
