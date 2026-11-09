@@ -155,5 +155,6 @@ that gate so partially created threads can exit and be joined.
   and priority queues.
 - Coffman, Elphick, and Shoshani, *System Deadlocks*: deadlock conditions.
 
-AI was used to review code, cleanup corrections, write this README, and review
-the resulting changes.
+AI was used to compare the existing code with the Subject, correct the parser,
+scheduling, synchronization, and resource cleanup, rename internal helper
+functions, write this README, and review the resulting changes.
