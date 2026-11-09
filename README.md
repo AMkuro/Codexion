@@ -61,21 +61,6 @@ make re       # Rebuild from scratch
 norminette includes srcs
 ```
 
-Development regression checks are available in `tests/` on `develop`; they are
-not included in the submission branch `master`. From a `develop` checkout, run:
-
-```sh
-make
-python3 tests/test_codexion.py
-```
-
-These checks need Python 3 and the C compiler. They exercise invalid
-arguments, phase timings, successful completion, burnout timing, cooldown, real
-dongle FIFO/EDF queues, equal-deadline ties, cancellation, heap removal, EDF tie-breaks,
-specific EDF convoy and cooldown scenarios, and
-cleanup at each allocation/synchronization/thread creation failure. Generated
-probe sources and binaries are created in a temporary directory and removed.
-
 ## Blocking cases handled
 
 - **Deadlock and hold-and-wait:** With two adjacent dongles, a coder takes both
@@ -101,8 +86,7 @@ probe sources and binaries are created in a temporary directory and removed.
   requests behind it even when a dongle is free. FIFO can therefore serialize
   compilation around the ring. The Subject requires liveness under EDF for
   feasible parameters; the queue and tie-break rules above are not a proof of
-  that guarantee. The regression checks cover specific cases, not all feasible
-  workloads. A local run of `./codexion 5 3000 200 200 200 10 800 edf`
+  that guarantee. A local run of `./codexion 5 3000 200 200 200 10 800 edf`
   burned out; that outcome alone does not establish parameter infeasibility.
   EDF liveness for all feasible parameters remains unverified, and no general
   feasibility criterion is established here.
@@ -122,10 +106,8 @@ probe sources and binaries are created in a temporary directory and removed.
   and frees both arrays. Threads created before a creation failure are stopped
   and joined.
 
-The Subject requires a burnout log within 10 ms of expiry. Regression checks
-compare log timestamps against deadlines in specific runs; they do not measure
-when output reaches the reader. The implementation uses `gettimeofday()` and
-polling, so process suspension, wall-clock changes, or blocked stdout can prevent
+The Subject requires a burnout log within 10 ms of expiry. The implementation
+uses `gettimeofday()` and polling, so process suspension, wall-clock changes, or blocked stdout can prevent
 it from meeting that bound.
 
 ## Thread synchronization mechanisms
@@ -170,5 +152,5 @@ that gate so partially created threads can exit and be joined.
   and priority queues.
 - Coffman, Elphick, and Shoshani, *System Deadlocks*: deadlock conditions.
 
-AI was used to review code, cleanup corrections, write
-regression probes and this README, and review the resulting changes.
+AI was used to review code, cleanup corrections, write this README, and review
+the resulting changes.
