@@ -1,0 +1,6 @@
+# Paths are relative to the repository root. Only committed regular files.
+.gitignore
+Makefile
+README.md
+includes/*.h
+srcs/**/*.c
