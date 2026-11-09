@@ -20,7 +20,6 @@ int		parse_positive_int(const char *str, int *out);
 int		parse_non_negative_long(const char *str, long *out);
 int		validate_config(const t_config *cfg);
 long	now_ms(void);
-long	sim_elapsed_ms(t_sim *sim);
 void	sleep_ms(t_sim *sim, long duration_ms);
 void	log_state(t_sim *sim, int coder_id, const char *message);
 int		begin_compile(t_coder *coder);
