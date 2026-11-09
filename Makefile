@@ -36,7 +36,7 @@ SRCS = \
 	$(SRCS_DIR)/time/time.c
 OBJS = $(SRCS:.c=.o)
 
-.PHONY: all clean fclean re 
+.PHONY: all clean fclean re help
 
 all: $(NAME)
 
@@ -53,4 +53,14 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+help:
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  all     Build $(NAME) (default)"
+	@echo "  clean   Remove object files"
+	@echo "  fclean  Remove object files and $(NAME)"
+	@echo "  re      Rebuild from scratch"
+	@echo "  help    Show this help"
 
