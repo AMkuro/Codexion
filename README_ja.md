@@ -57,14 +57,8 @@ burnoutの行が最後のログになります。
 make clean    # objectファイルと依存関係ファイルを削除
 make fclean   # 実行ファイルも削除
 make re       # 最初からビルドし直す
-python3 tests/test_codexion.py
 norminette includes srcs
 ```
-
-回帰テストにはPython 3とCコンパイラが必要です。
-不正な引数、各処理の時間、正常完了、burnoutの時刻、cooldown、実際のdongle待ち行列でのFIFO/EDF、同じdeadlineでの優先順位、要求の取消、ヒープからの削除、EDFのtie-break、EDFでの待ち時間の連鎖と保持したままの待機の防止を検査します。
-メモリ確保、同期オブジェクトの初期化、スレッド作成の各段階で失敗させ、資源を解放できることも確認します。
-検証用のソースと実行ファイルは一時ディレクトリに作成し、テスト後に削除します。
 
 ## 待ちと停止への対策（Blocking cases handled）
 
@@ -104,9 +98,8 @@ norminette includes srcs
 - **初期化途中の失敗**：初期化段階を記録し、作成済みのmutex、条件変数、ヒープだけを破棄して、2つの配列を解放します。
   スレッド作成に失敗した場合は、それまでに作成したスレッドを停止してjoinします。
 
-テストでは、burnoutを10ミリ秒以内に報告する要件を確認します。
+Subjectは、burnoutを10ミリ秒以内に報告することを求めています。
 プロセスの一時停止、実時刻の変更、標準出力への書き込みの停止によって、この時間を守れない場合があります。
-時刻の検査は、通常のOSスケジューリングと、書き込みを受け付ける出力先を前提とします。
 
 ## スレッドの同期（Thread synchronization mechanisms）
 
@@ -144,4 +137,4 @@ mainが共通の開始時刻を設定してbroadcastすると、各スレッド�
 - Cormen, Leiserson, Rivest, Stein, *Introduction to Algorithms*：二分ヒープと優先度付きキュー。
 - Coffman, Elphick, Shoshani, *System Deadlocks*：デッドロックの成立条件。
 
-今回の修正では、既存コードとSubjectの照合、パーサー、スケジューリング、同期処理、資源解放の修正、回帰テストとREADMEの作成、修正後のレビューにAIを使用しました。
+今回の修正では、既存コードとSubjectの照合、パーサー、スケジューリング、同期処理、資源解放の修正、READMEの作成、修正後のレビューにAIを使用しました。
